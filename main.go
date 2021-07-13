@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -12,10 +13,13 @@ import (
 
 const (
 	// максимально допустимое число ошибок при парсинге
-	errorsLimit = 100000
+	errorsLimit = 1000
 
 	// число результатов, которые хотим получить
 	resultsLimit = 10000
+
+	// общий таймаут
+	maxTime = 2 * time.Second
 )
 
 var (
@@ -42,6 +46,8 @@ func init() {
 }
 
 func main() {
+	fmt.Printf("Process PID : %v\n", os.Getpid())
+
 	started := time.Now()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -49,6 +55,8 @@ func main() {
 	defer cancel()
 
 	crawler := newCrawler(depthLimit)
+
+	watchUsrSignal(ctx, crawler)
 
 	// создаём канал для результатов
 	results := make(chan crawlResult)
@@ -58,12 +66,41 @@ func main() {
 
 	// запуск основной логики
 	// внутри есть рекурсивные запуски анализа в других горутинах
-	crawler.run(ctx, url, results, 0)
+	// добавила wait group для корректного оджидания завершения всех горутин
+	crawler.wg.Add(1)
+
+	// общий таймаут для парсера
+	ctxParse, cancelParse := context.WithTimeout(ctx, maxTime)
+	defer cancelParse()
+	crawler.run(ctxParse, url, results, 0)
+
+	crawler.wg.Wait()
+	close(results)
 
 	// ждём завершения работы чтения в своей горутине
 	<-done
 
 	log.Println(time.Since(started))
+}
+
+func watchUsrSignal(ctx context.Context, c *crawler) {
+	usrSignalChan := make(chan os.Signal)
+
+	signal.Notify(usrSignalChan,
+		syscall.SIGUSR1)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case sig := <-usrSignalChan:
+				c.maxDepth += 2
+				log.Printf("got signal %q, max depth increades by 2", sig.String())
+			}
+		}
+	}()
+
 }
 
 // ловим сигналы выключения
@@ -91,7 +128,11 @@ func watchCrawler(ctx context.Context, results <-chan crawlResult, maxErrors, ma
 			case <-ctx.Done():
 				return
 
-			case result := <-results:
+			case result, ok := <-results:
+				if !ok {
+					return
+				}
+
 				if result.err != nil {
 					maxErrors--
 					if maxErrors <= 0 {
@@ -101,11 +142,13 @@ func watchCrawler(ctx context.Context, results <-chan crawlResult, maxErrors, ma
 					continue
 				}
 
-				log.Printf("crawling result: %v", result.msg)
-				maxResults--
-				if maxResults <= 0 {
-					log.Println("got max results")
-					return
+				if result.msg != "" {
+					log.Printf("crawling result: %v", result.msg)
+					maxResults--
+					if maxResults <= 0 {
+						log.Println("got max results")
+						return
+					}
 				}
 			}
 		}

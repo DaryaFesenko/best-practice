@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/pkg/errors"
 )
@@ -18,6 +17,7 @@ type crawler struct {
 	sync.Mutex
 	visited  map[string]string
 	maxDepth int
+	wg       sync.WaitGroup
 }
 
 func newCrawler(maxDepth int) *crawler {
@@ -29,9 +29,8 @@ func newCrawler(maxDepth int) *crawler {
 
 // рекурсивно сканируем страницы
 func (c *crawler) run(ctx context.Context, url string, results chan<- crawlResult, depth int) {
-	// просто для того, чтобы успевать следить за выводом программы, можно убрать :)
-	time.Sleep(2 * time.Second)
 
+	defer c.wg.Done()
 	// проверяем что контекст исполнения актуален
 	select {
 	case <-ctx.Done():
@@ -73,6 +72,7 @@ func (c *crawler) run(ctx context.Context, url string, results chan<- crawlResul
 				continue
 			}
 
+			c.wg.Add(1)
 			go c.run(ctx, link, results, depth+1)
 		}
 	}

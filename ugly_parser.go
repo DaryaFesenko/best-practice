@@ -50,7 +50,7 @@ func pageLinks(links map[string]struct{}, n *html.Node) map[string]struct{} {
 
 			// костылик для простоты
 			if _, ok := links[a.Val]; !ok && len(a.Val) > 2 && a.Val[:2] == "//" {
-				links["http://"+a.Val[2:]] = struct{}{}
+				links["https://"+a.Val[2:]] = struct{}{}
 			}
 		}
 	}
