@@ -95,7 +95,9 @@ func watchUsrSignal(ctx context.Context, c *crawler) {
 			case <-ctx.Done():
 				return
 			case sig := <-usrSignalChan:
+				c.Mutex.Lock()
 				c.maxDepth += 2
+				c.Mutex.Unlock()
 				log.Printf("got signal %q, max depth increades by 2", sig.String())
 			}
 		}

@@ -3,14 +3,18 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/html"
 )
 
 // парсим страницу
 func parse(url string) (*html.Node, error) {
-	// что здесь должно быть вместо http.Get? :)
-	r, err := http.Get(url)
+	cli := http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	r, err := cli.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("can't get page")
 	}
