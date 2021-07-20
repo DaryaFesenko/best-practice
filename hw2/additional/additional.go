@@ -24,13 +24,14 @@ func CreateDuplicateFile(path string) []string {
 	}
 
 	readDirectory(path, list, files)
-
 	n := rand.Intn(len(list)-1) + 1
 
-	for i := 0; i < n; i++ {
-		for name, pathFile := range list {
-			copy(path+"/copy", pathFile, name)
-			listCopy = append(listCopy, path+"\\copy\\"+name)
+	for name, pathFile := range list {
+		copy(path+"/copy", pathFile, name)
+		listCopy = append(listCopy, name)
+		n--
+
+		if n == 0 {
 			break
 		}
 	}
@@ -40,7 +41,7 @@ func CreateDuplicateFile(path string) []string {
 
 func readDirectory(path string, list map[string]string, files []fs.FileInfo) {
 	for _, file := range files {
-		newPath := path + "\\" + file.Name()
+		newPath := path + "/" + file.Name()
 		if !file.IsDir() {
 			list[file.Name()] = newPath
 		} else {

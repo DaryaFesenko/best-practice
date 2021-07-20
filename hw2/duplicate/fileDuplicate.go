@@ -82,7 +82,7 @@ func readDirectory(wg *sync.WaitGroup, mutex *sync.Mutex, path string, files []f
 	for _, file := range files {
 		newPath := path + "/" + file.Name()
 		if !file.IsDir() {
-			l.Debugf("read file:", newPath)
+			l.Debug("read file:", newPath)
 			fileByte, err := ioutil.ReadFile(newPath)
 			if err != nil {
 				return fmt.Errorf("file: %s error: %s", path, err)
@@ -90,7 +90,7 @@ func readDirectory(wg *sync.WaitGroup, mutex *sync.Mutex, path string, files []f
 			wg.Add(1)
 			go addFileInfo(wg, mutex, fileByte, newPath, file.Name(), list)
 		} else {
-			l.Debugf("read directory:", newPath)
+			l.Debug("read directory:", newPath)
 			dir, err := ioutil.ReadDir(newPath)
 
 			if err != nil {
