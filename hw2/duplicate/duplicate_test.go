@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// мокаю файловую систему, проверяю логику формирования объектов для поиска дубликатов
 func TestDuplicate_GetAllFiles(t *testing.T) {
 	fsMock := &mocks.FS{}
 	fa := &FileActions{fs: fsMock}
