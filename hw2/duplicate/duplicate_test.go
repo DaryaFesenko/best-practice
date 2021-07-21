@@ -2,12 +2,45 @@ package duplicate
 
 import (
 	"hw2/additional"
+	"hw2/duplicate/mocks"
 	"sort"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestDuplicate_GetAllFiles(t *testing.T) {
+	fsMock := &mocks.FS{}
+	fa := &FileActions{fs: fsMock}
+
+	fsMock.On("ReadDir", "test_dir").Return(FillFiles([]string{"copy"}, []string{"aaaa", "gggg"}), nil)
+	fsMock.On("ReadDir", "test_dir/copy").Return(FillFiles([]string{}, []string{"aaaa", "gggg"}), nil)
+
+	b := make([]byte, 0)
+	fsMock.On("ReadFile", "test_dir/aaaa").Return(b, nil)
+	fsMock.On("ReadFile", "test_dir/gggg").Return(b, nil)
+	fsMock.On("ReadFile", "test_dir/copy/aaaa").Return(b, nil)
+	fsMock.On("ReadFile", "test_dir/copy/gggg").Return(b, nil)
+
+	res, err := fa.getAllFiles("test_dir")
+
+	list := FilesInfo{}
+
+	AddFileInfo("test_dir/aaaa", "aaaa", &list)
+	AddFileInfo("test_dir/gggg", "gggg", &list)
+	AddFileInfo("test_dir/copy/aaaa", "aaaa", &list)
+	AddFileInfo("test_dir/copy/gggg", "gggg", &list)
+
+	require.NoError(t, err)
+
+	for _, val := range res.list {
+		if !list.FindItemByPath(val.path) {
+			t.Fatal("item not found :", val.path)
+		}
+	}
+}
 
 func TestGetDuplicate(t *testing.T) {
 	testCases := []struct {
