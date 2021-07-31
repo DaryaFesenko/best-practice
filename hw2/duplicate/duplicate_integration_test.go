@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-// проверка интеграции файловой системыfunc TestDuplicate_ReadDirectory(t *testing.T) {
+// проверка интеграции файловой системы
+func TestDuplicate_ReadDirectory(t *testing.T) {
 	path := "/home/d/projects/gb/best-practice/hw2/test_integration"
 
 	i := &ioutilStruct{}
@@ -21,7 +23,7 @@ import (
 	// что буду просто тестировать открытие одной папки и одного файла
 	res, err := f.getAllFiles(path)
 
-	assert.Equal(t, err, nil)
-	assert.Equal(t, len(res.list), len(expected.list))
-	assert.Equal(t, res.list[0], expected.list[0])
+	require.NoError(t, err)
+	require.Len(t, res.list, len(expected.list))
+	require.Equal(t, res.list[0], expected.list[0])
 }
