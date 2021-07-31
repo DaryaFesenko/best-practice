@@ -3,31 +3,31 @@ package main
 import (
 	"flag"
 	"fmt"
+
+	//"hw2/additional"
+	"hw2/config"
 	"hw2/duplicate"
 	"os"
 
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	path   *string
-	remove *bool
-	debug  *bool
-)
-
 func main() {
-	remove = flag.Bool("r", false, "remove duplicate")
-	path = flag.String("p", "./test_dir", "directory path")
-	debug = flag.Bool("debug", true, "set log level to debug")
+
+	remove := flag.Bool("r", false, "remove duplicate")
+	path := flag.String("p", "./test_dir", "directory path")
+	debug := flag.Bool("debug", true, "set log level to debug")
 	flag.Parse()
 
+	config := config.New(path, remove, debug)
+
 	log.SetFormatter(&log.JSONFormatter{})
-	if *debug {
+	if config.GetDebug() {
 		log.SetLevel(log.DebugLevel)
 	}
 
 	log.Info("start program")
-	Run(*path, *remove)
+	Run(config.GetPath(), config.GetRemove())
 }
 
 func Run(path string, remove bool) {

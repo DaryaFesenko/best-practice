@@ -15,6 +15,16 @@ func (f *FilesInfo) AddItem(fileName string, path string, hash_md5 string, hash_
 	f.list = append(f.list, item)
 }
 
+func (f *FilesInfo) FindItemByPath(path string) bool {
+	for _, val := range f.list {
+		if val.path == path {
+			return true
+		}
+	}
+
+	return false
+}
+
 type fileInfo struct {
 	fileName    string
 	hash_md5    string

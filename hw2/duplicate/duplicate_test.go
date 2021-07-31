@@ -2,8 +2,46 @@ package duplicate
 
 import (
 	"hw2/additional"
+	"hw2/duplicate/mocks"
+	"sort"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+// мокаю файловую систему, проверяю логику формирования объектов для поиска дубликатов
+func TestDuplicate_GetAllFiles(t *testing.T) {
+	fsMock := &mocks.FS{}
+	fa := &FileActions{fs: fsMock}
+
+	fsMock.On("ReadDir", "test_dir").Return(FillFiles([]string{"copy"}, []string{"aaaa", "gggg"}), nil)
+	fsMock.On("ReadDir", "test_dir/copy").Return(FillFiles([]string{}, []string{"aaaa", "gggg"}), nil)
+
+	b := make([]byte, 0)
+	fsMock.On("ReadFile", "test_dir/aaaa").Return(b, nil)
+	fsMock.On("ReadFile", "test_dir/gggg").Return(b, nil)
+	fsMock.On("ReadFile", "test_dir/copy/aaaa").Return(b, nil)
+	fsMock.On("ReadFile", "test_dir/copy/gggg").Return(b, nil)
+
+	res, err := fa.getAllFiles("test_dir")
+
+	list := FilesInfo{}
+
+	AddFileInfo("test_dir/aaaa", "aaaa", &list)
+	AddFileInfo("test_dir/gggg", "gggg", &list)
+	AddFileInfo("test_dir/copy/aaaa", "aaaa", &list)
+	AddFileInfo("test_dir/copy/gggg", "gggg", &list)
+
+	require.NoError(t, err)
+
+	for _, val := range res.list {
+		if !list.FindItemByPath(val.path) {
+			t.Fatal("item not found :", val.path)
+		}
+	}
+}
 
 func TestGetDuplicate(t *testing.T) {
 	testCases := []struct {
@@ -13,75 +51,55 @@ func TestGetDuplicate(t *testing.T) {
 	}{
 		{
 			Name:      "no duplicate",
-			path:      "C:\\goDir",
+			path:      "./test_dir",
 			duplicate: []string{},
 		},
 		{
 			Name:      "no folder",
-			path:      "C:\\goDir2",
+			path:      "./test_dir2",
 			duplicate: []string{},
 		},
 		{
 			Name:      "test1",
-			path:      "C:\\goDir",
+			path:      "/home/d/projects/gb/best-practice/hw2/test_dir",
 			duplicate: []string{},
 		},
 		{
 			Name:      "test2",
-			path:      "C:\\goDir",
+			path:      "/home/d/projects/gb/best-practice/hw2/test_dir",
 			duplicate: []string{},
 		},
 		{
 			Name:      "test3",
-			path:      "C:\\goDir",
+			path:      "/home/d/projects/gb/best-practice/hw2/test_dir",
 			duplicate: []string{},
 		},
 	}
 
-	t.Run(testCases[0].Name, func(t *testing.T) {
-		out, _ := GetDuplicateFile(testCases[0].path)
+	out, _ := GetDuplicateFile(testCases[0].path)
+	assert.Empty(t, out, testCases[0].duplicate)
 
-		if len(out) > 0 {
-			t.Fatalf("got %v, but want %v", out, testCases[0].duplicate)
-		}
-	})
-
-	t.Run(testCases[1].Name, func(t *testing.T) {
-		_, err := GetDuplicateFile(testCases[1].path)
-
-		if err == nil {
-			t.Fatalf("an error was expected: directory does not open")
-		}
-	})
-
-	for i := 2; i < len(testCases); i++ {
-		testCases[i].duplicate = additional.CreateDuplicateFile(testCases[i].path)
-	}
+	_, err := GetDuplicateFile(testCases[1].path)
+	assert.NotEqual(t, err, nil)
 
 	for i := 2; i < len(testCases); i++ {
 		tt := testCases[i]
-		t.Run(tt.Name, func(t *testing.T) {
-			out, err := GetDuplicateFile(tt.path)
 
-			if err != nil {
-				t.Fatalf("ERROR: %v", err)
-			}
+		tt.duplicate = additional.CreateDuplicateFile(tt.path)
 
-			if len(out) == len(tt.duplicate) {
-				for _, val := range tt.duplicate {
-					exist := false
-					for _, valOut := range out {
-						if valOut == val {
-							exist = true
-							break
-						}
-					}
+		res, err := GetDuplicateFile(tt.path)
 
-					if !exist {
-						t.Fatalf("got %v, but want %v", out, tt.duplicate)
-					}
-				}
-			}
-		})
+		assert.Equal(t, err, nil)
+
+		out := make([]string, 0)
+		for _, val := range res {
+			lastIndex := strings.LastIndex(val, "/")
+
+			out = append(out, val[lastIndex+1:])
+		}
+
+		sort.Strings(tt.duplicate)
+		sort.Strings(out)
+		assert.Equal(t, out, tt.duplicate)
 	}
 }
