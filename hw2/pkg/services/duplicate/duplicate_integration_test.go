@@ -5,25 +5,29 @@ package duplicate
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"hw2/pkg/helper"
+
+	"hw2/pkg/models"
+	fa "hw2/pkg/services/fileaction"
+
 	"github.com/stretchr/testify/require"
 )
 
 // проверка интеграции файловой системы
 func TestDuplicate_ReadDirectory(t *testing.T) {
-	path := "/home/d/projects/gb/best-practice/hw2/test_integration"
+	path := "/home/d/projects/gb/best-practice/hw2/test/test_integration"
 
 	i := &ioutilStruct{}
-	f := &FileActions{fs: i}
+	f := &fa.FileActions{FS: i}
 
-	expected := FilesInfo{}
-	AddFileInfo("/home/d/projects/gb/best-practice/hw2/test_integration/copy/aaaa", "aaaa", &expected)
+	expected := models.FilesInfo{}
+	helper.AddFileInfo(path+"/copy/aaaa", "aaaa", &expected)
 
 	// вынуждена тестить тот же метод, что и для мок, но входные данные такие,
 	// что буду просто тестировать открытие одной папки и одного файла
-	res, err := f.getAllFiles(path)
+	res, err := f.GetAllFiles(path)
 
 	require.NoError(t, err)
-	require.Len(t, res.list, len(expected.list))
-	require.Equal(t, res.list[0], expected.list[0])
+	require.Len(t, res.List, len(expected.List))
+	require.Equal(t, res.List[0], expected.List[0])
 }

@@ -1,37 +1,53 @@
 package duplicate
 
 import (
+	"io/fs"
+	"io/ioutil"
 	"os"
+
+	"hw2/pkg/models"
+	fa "hw2/pkg/services/fileaction"
 
 	log "github.com/sirupsen/logrus"
 )
+
+type ioutilStruct struct {
+}
+
+func (i ioutilStruct) ReadDir(nameDir string) ([]fs.FileInfo, error) {
+	return ioutil.ReadDir(nameDir)
+}
+
+func (i ioutilStruct) ReadFile(fileName string) ([]byte, error) {
+	return ioutil.ReadFile(fileName)
+}
 
 func GetDuplicateFile(pathDir string) ([]string, error) {
 	l := log.WithField("FuncName", "GetDuplicateFile").WithField("path", pathDir)
 	l.Debugf("run get duplicates")
 
 	i := &ioutilStruct{}
-	f := &FileActions{fs: i}
+	f := &fa.FileActions{FS: i}
 
-	files, err := f.getAllFiles(pathDir)
+	files, err := f.GetAllFiles(pathDir)
 	listDuplicate := []string{}
-	listOrigin := []fileInfo{}
+	listOrigin := []models.FileInfo{}
 
 	if err != nil {
 		return listDuplicate, err
 	}
 
-	for _, file := range files.list {
+	for _, file := range files.List {
 		exist := false
 		for _, val := range listOrigin {
-			if val.fileName == file.fileName && val.hash_md5 == file.hash_md5 && val.hash_sha256 == file.hash_sha256 && !exist {
-				listDuplicate = append(listDuplicate, file.path)
+			if val.FileName == file.FileName && val.Hash_md5 == file.Hash_md5 && val.Hash_sha256 == file.Hash_sha256 && !exist {
+				listDuplicate = append(listDuplicate, file.Path)
 				exist = true
 			}
 		}
 
 		if !exist {
-			item := fileInfo{fileName: file.fileName, hash_md5: file.hash_md5, hash_sha256: file.hash_sha256}
+			item := models.FileInfo{FileName: file.FileName, Hash_md5: file.Hash_md5, Hash_sha256: file.Hash_sha256}
 			listOrigin = append(listOrigin, item)
 		}
 	}

@@ -1,9 +1,10 @@
-package duplicate
+package helper
 
 import (
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
+	"hw2/pkg/models"
 	"io/fs"
 	"time"
 )
@@ -51,7 +52,7 @@ func FillFiles(dirNames, fileNames []string) []fs.FileInfo {
 	return returns
 }
 
-func AddFileInfo(path string, fileName string, list *FilesInfo) {
+func AddFileInfo(path string, fileName string, list *models.FilesInfo) {
 	b := make([]byte, 0)
 	h1 := md5.New()
 	h1.Write(b)

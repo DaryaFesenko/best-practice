@@ -3,11 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-
-	//"hw2/additional"
-	"hw2/config"
-	"hw2/duplicate"
+	"hw2/pkg/services/duplicate"
 	"os"
+
+	"hw2/config"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,7 +14,7 @@ import (
 func main() {
 
 	remove := flag.Bool("r", false, "remove duplicate")
-	path := flag.String("p", "./test_dir", "directory path")
+	path := flag.String("p", "./test/test_dir", "directory path")
 	debug := flag.Bool("debug", true, "set log level to debug")
 	flag.Parse()
 
