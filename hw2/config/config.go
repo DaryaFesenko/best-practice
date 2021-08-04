@@ -7,7 +7,8 @@ type Config struct {
 }
 
 func New(path *string, remove, debug *bool) Config {
-	c := *new(Config)
+	// Линтер gocritic - создание объекта
+	c := Config{}
 
 	c.debug = debug
 	c.path = path

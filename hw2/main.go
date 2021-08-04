@@ -11,8 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func main() {
-
+func main() { // линтер whitespace - лишняя строка пустая
 	remove := flag.Bool("r", false, "remove duplicate")
 	path := flag.String("p", "./test/test_dir", "directory path")
 	debug := flag.Bool("debug", true, "set log level to debug")
@@ -21,6 +20,7 @@ func main() {
 	config := config.New(path, remove, debug)
 
 	log.SetFormatter(&log.JSONFormatter{})
+
 	if config.GetDebug() {
 		log.SetLevel(log.DebugLevel)
 	}
@@ -44,6 +44,7 @@ func Run(path string, remove bool) {
 	}
 
 	fmt.Println("Duplicates:")
+
 	for i, item := range duplicates {
 		fmt.Printf("%d.  %s", i+1, item)
 		fmt.Println()
@@ -51,6 +52,7 @@ func Run(path string, remove bool) {
 
 	if remove {
 		fmt.Print("remove duplicates? ", "confirm command: (y/n)  ")
+
 		response := ""
 		fmt.Fscan(os.Stdin, &response)
 
