@@ -3,19 +3,22 @@ package models
 type FilesInfo struct {
 	List []FileInfo
 }
+
+// Линтер revive - исправила названия переменных
 type FileInfo struct {
-	FileName    string
-	Hash_md5    string
-	Hash_sha256 string
-	Path        string
+	FileName   string
+	HashMd5    string
+	HashSha256 string
+	Path       string
 }
 
-func (f *FilesInfo) AddItem(fileName string, path string, hash_md5 string, hash_sha256 string) {
+// Линтер gocriric - все параметры типа стринг, можно объединить
+func (f *FilesInfo) AddItem(fileName, path, hashMd5, hashSha256 string) {
 	item := FileInfo{
-		FileName:    fileName,
-		Path:        path,
-		Hash_md5:    hash_md5,
-		Hash_sha256: hash_sha256,
+		FileName:   fileName,
+		Path:       path,
+		HashMd5:    hashMd5,
+		HashSha256: hashSha256,
 	}
 
 	f.List = append(f.List, item)

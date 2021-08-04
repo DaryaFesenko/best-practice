@@ -40,14 +40,14 @@ func GetDuplicateFile(pathDir string) ([]string, error) {
 	for _, file := range files.List {
 		exist := false
 		for _, val := range listOrigin {
-			if val.FileName == file.FileName && val.Hash_md5 == file.Hash_md5 && val.Hash_sha256 == file.Hash_sha256 && !exist {
+			if val.FileName == file.FileName && val.HashMd5 == file.HashMd5 && val.HashSha256 == file.HashSha256 && !exist {
 				listDuplicate = append(listDuplicate, file.Path)
 				exist = true
 			}
 		}
 
 		if !exist {
-			item := models.FileInfo{FileName: file.FileName, Hash_md5: file.Hash_md5, Hash_sha256: file.Hash_sha256}
+			item := models.FileInfo{FileName: file.FileName, HashMd5: file.HashMd5, HashSha256: file.HashSha256}
 			listOrigin = append(listOrigin, item)
 		}
 	}
@@ -66,5 +66,6 @@ func RemoveDuplicate(duplicate []string) error {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -17,17 +17,19 @@ func CreateDuplicateFile(path string) []string {
 	if _, err := os.Stat(path + "/copy"); err == nil {
 		os.RemoveAll(path + "/copy")
 	}
-	err := os.Mkdir(path+"/copy", os.ModePerm)
-
-	if err != nil {
-		log.Println(err)
+	// Линтер wsl - названия пременных с с ошибками должны быть разными (но в проекте реальном такого не видела)
+	if errCopy := os.Mkdir(path+"/copy", os.ModePerm); errCopy != nil {
+		log.Println(errCopy)
 	}
 
 	readDirectory(path, list, files)
 	n := rand.Intn(len(list)-1) + 1
 
 	for name, pathFile := range list {
-		copy(path+"/copy", pathFile, name)
+		if err := copy(path+"/copy", pathFile, name); err != nil {
+			log.Fatalf("cant't copy file: %s", err)
+		}
+
 		listCopy = append(listCopy, name)
 		n--
 
@@ -51,13 +53,19 @@ func readDirectory(path string, list map[string]string, files []fs.FileInfo) {
 	}
 }
 
-func copy(pathDir string, path string, name string) {
+func copy(pathDir, path, name string) error {
 	file, _ := os.Open(path)
 
 	copyFile, _ := os.Create(pathDir + "/" + name)
 
-	io.Copy(copyFile, file)
+	// Линтер errcheck  - не было проверки на ошибку
+	_, err := io.Copy(copyFile, file)
+	if err != nil {
+		return err
+	}
 
 	file.Close()
 	copyFile.Close()
+
+	return nil
 }

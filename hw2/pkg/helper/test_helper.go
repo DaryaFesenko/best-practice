@@ -9,11 +9,14 @@ import (
 	"time"
 )
 
+const plug = 0
+
 type FileInfo struct {
 	name  string
 	isDir bool
 }
 
+// Линтер gomnd - убрала магические цифры в константу
 func (f *FileInfo) Name() string {
 	return f.name
 }
@@ -23,17 +26,19 @@ func (f *FileInfo) IsDir() bool {
 }
 
 func (f *FileInfo) Size() int64 {
-	return int64(5)
+	return int64(plug)
 }
 
 func (f *FileInfo) Mode() fs.FileMode {
-	return fs.FileMode(6)
+	return fs.FileMode(plug)
 }
+
 func (f *FileInfo) ModTime() time.Time {
 	return time.Now()
 }
+
 func (f *FileInfo) Sys() interface{} {
-	return int64(5)
+	return int64(plug)
 }
 
 func FillFiles(dirNames, fileNames []string) []fs.FileInfo {
@@ -52,15 +57,17 @@ func FillFiles(dirNames, fileNames []string) []fs.FileInfo {
 	return returns
 }
 
-func AddFileInfo(path string, fileName string, list *models.FilesInfo) {
+// Линтер gocriric - параметры типа стринг, можно объединить
+// Линтер revive - исправила название переменных
+func AddFileInfo(path, fileName string, list *models.FilesInfo) {
 	b := make([]byte, 0)
 	h1 := md5.New()
 	h1.Write(b)
-	hash_md5 := hex.EncodeToString(h1.Sum(nil))
+	hashMd5 := hex.EncodeToString(h1.Sum(nil))
 
 	h2 := sha256.New()
 	h2.Write(b)
-	hash_sha256 := hex.EncodeToString(h2.Sum(nil))
+	hashSha256 := hex.EncodeToString(h2.Sum(nil))
 
-	list.AddItem(fileName, path, hash_md5, hash_sha256)
+	list.AddItem(fileName, path, hashMd5, hashSha256)
 }
