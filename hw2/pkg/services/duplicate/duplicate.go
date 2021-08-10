@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"hw2/pkg/models"
-	fa "hw2/pkg/services/fileaction"
+	"best-practice/hw2/pkg/models"
+	fa "best-practice/hw2/pkg/services/fileaction"
 
 	log "github.com/sirupsen/logrus"
 )
