@@ -26,7 +26,7 @@ func CreateDuplicateFile(path string) []string {
 	n := rand.Intn(len(list)-1) + 1
 
 	for name, pathFile := range list {
-		if err := copy(path+"/copy", pathFile, name); err != nil {
+		if err := copyAll(path+"/copy", pathFile, name); err != nil {
 			log.Fatalf("cant't copy file: %s", err)
 		}
 
@@ -53,7 +53,7 @@ func readDirectory(path string, list map[string]string, files []fs.FileInfo) {
 	}
 }
 
-func copy(pathDir, path, name string) error {
+func copyAll(pathDir, path, name string) error {
 	file, _ := os.Open(path)
 
 	copyFile, _ := os.Create(pathDir + "/" + name)

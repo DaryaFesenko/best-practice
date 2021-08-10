@@ -27,7 +27,7 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - govet
+    #- govet
     - gocyclo
     - dupl
     - lll
@@ -60,6 +60,4 @@ run:
   concurrency: 2
   timeout: 2m
   tests: false
-  skip-dirs:
-    - test
-    - pkg/mocks
+

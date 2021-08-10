@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"hw2/pkg/services/duplicate"
 	"os"
 
-	"hw2/config"
+	"best-practice/hw2/pkg/services/duplicate"
+
+	"best-practice/hw2/config"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -17,16 +18,16 @@ func main() { // линтер whitespace - лишняя строка пуста�
 	debug := flag.Bool("debug", true, "set log level to debug")
 	flag.Parse()
 
-	config := config.New(path, remove, debug)
+	c := config.New(path, remove, debug)
 
 	log.SetFormatter(&log.JSONFormatter{})
 
-	if config.GetDebug() {
+	if c.GetDebug() {
 		log.SetLevel(log.DebugLevel)
 	}
 
 	log.Info("start program")
-	Run(config.GetPath(), config.GetRemove())
+	Run(c.GetPath(), c.GetRemove())
 }
 
 func Run(path string, remove bool) {

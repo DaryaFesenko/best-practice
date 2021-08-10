@@ -1,14 +1,15 @@
 package duplicate
 
 import (
-	"hw2/pkg/mocks"
 	"sort"
 	"strings"
 	"testing"
 
-	"hw2/pkg/helper"
-	"hw2/pkg/models"
-	fa "hw2/pkg/services/fileaction"
+	"best-practice/hw2/pkg/mocks"
+
+	"best-practice/hw2/pkg/helper"
+	"best-practice/hw2/pkg/models"
+	fa "best-practice/hw2/pkg/services/fileaction"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

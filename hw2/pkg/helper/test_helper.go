@@ -1,10 +1,10 @@
 package helper
 
 import (
+	"best-practice/hw2/pkg/models"
 	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
-	"hw2/pkg/models"
 	"io/fs"
 	"time"
 )

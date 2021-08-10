@@ -8,7 +8,7 @@ import (
 	"io/fs"
 	"sync"
 
-	"hw2/pkg/models"
+	"best-practice/hw2/pkg/models"
 
 	log "github.com/sirupsen/logrus"
 )
