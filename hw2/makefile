@@ -1,5 +1,5 @@
 APP = hw2
-PROJECT = github.com/DaryaFesenko/best-practice
+PROJECT = github.com/DaryaFesenko/best-practice/hw2
 STDERR=/tmp/.$(APP)-stderr.txt
 
 HAS_LINT := $(shell command -v golangci-lint;)
@@ -9,7 +9,7 @@ all: run
 
 lint: bootstrap
 	@echo "+ $@"
-	@golangci-lint run -c golangci.yaml
+	@golangci-lint run
 
 run: clean build
 	@echo "+ $@"
