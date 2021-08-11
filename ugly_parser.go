@@ -3,14 +3,18 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/html"
 )
 
 // парсим страницу
 func parse(url string) (*html.Node, error) {
-	// что здесь должно быть вместо http.Get? :)
-	r, err := http.Get(url)
+	cli := http.Client{
+		Timeout: 2 * time.Second,
+	}
+
+	r, err := cli.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("can't get page")
 	}
@@ -50,7 +54,7 @@ func pageLinks(links map[string]struct{}, n *html.Node) map[string]struct{} {
 
 			// костылик для простоты
 			if _, ok := links[a.Val]; !ok && len(a.Val) > 2 && a.Val[:2] == "//" {
-				links["http://"+a.Val[2:]] = struct{}{}
+				links["https://"+a.Val[2:]] = struct{}{}
 			}
 		}
 	}
