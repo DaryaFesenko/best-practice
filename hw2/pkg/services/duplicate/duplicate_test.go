@@ -1,11 +1,14 @@
 package duplicate
 
 import (
-	"hw2/additional"
-	"hw2/duplicate/mocks"
+	"hw2/pkg/mocks"
 	"sort"
 	"strings"
 	"testing"
+
+	"hw2/pkg/helper"
+	"hw2/pkg/models"
+	fa "hw2/pkg/services/fileaction"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,36 +17,42 @@ import (
 // мокаю файловую систему, проверяю логику формирования объектов для поиска дубликатов
 func TestDuplicate_GetAllFiles(t *testing.T) {
 	fsMock := &mocks.FS{}
-	fa := &FileActions{fs: fsMock}
+	fa := &fa.FileActions{FS: fsMock}
 
-	fsMock.On("ReadDir", "test_dir").Return(FillFiles([]string{"copy"}, []string{"aaaa", "gggg"}), nil)
-	fsMock.On("ReadDir", "test_dir/copy").Return(FillFiles([]string{}, []string{"aaaa", "gggg"}), nil)
+	test_dir := "test_dir"
+	test_dir_copy := "test_dir/copy"
+	ReadDir := "ReadDir"
+	ReadFile := "ReadFile"
+
+	fsMock.On(ReadDir, test_dir).Return(helper.FillFiles([]string{"copy"}, []string{"aaaa", "gggg"}), nil)
+	fsMock.On(ReadDir, test_dir_copy).Return(helper.FillFiles([]string{}, []string{"aaaa", "gggg"}), nil)
 
 	b := make([]byte, 0)
-	fsMock.On("ReadFile", "test_dir/aaaa").Return(b, nil)
-	fsMock.On("ReadFile", "test_dir/gggg").Return(b, nil)
-	fsMock.On("ReadFile", "test_dir/copy/aaaa").Return(b, nil)
-	fsMock.On("ReadFile", "test_dir/copy/gggg").Return(b, nil)
+	fsMock.On(ReadFile, test_dir+"/aaaa").Return(b, nil)
+	fsMock.On(ReadFile, test_dir+"/gggg").Return(b, nil)
+	fsMock.On(ReadFile, test_dir_copy+"/aaaa").Return(b, nil)
+	fsMock.On(ReadFile, test_dir_copy+"/gggg").Return(b, nil)
 
-	res, err := fa.getAllFiles("test_dir")
+	res, err := fa.GetAllFiles(test_dir)
 
-	list := FilesInfo{}
+	list := models.FilesInfo{}
 
-	AddFileInfo("test_dir/aaaa", "aaaa", &list)
-	AddFileInfo("test_dir/gggg", "gggg", &list)
-	AddFileInfo("test_dir/copy/aaaa", "aaaa", &list)
-	AddFileInfo("test_dir/copy/gggg", "gggg", &list)
+	helper.AddFileInfo(test_dir+"/aaaa", "aaaa", &list)
+	helper.AddFileInfo(test_dir+"/gggg", "gggg", &list)
+	helper.AddFileInfo(test_dir_copy+"/aaaa", "aaaa", &list)
+	helper.AddFileInfo(test_dir_copy+"/gggg", "gggg", &list)
 
 	require.NoError(t, err)
 
-	for _, val := range res.list {
-		if !list.FindItemByPath(val.path) {
-			t.Fatal("item not found :", val.path)
+	for _, val := range res.List {
+		if !list.FindItemByPath(val.Path) {
+			t.Fatal("item not found :", val.Path)
 		}
 	}
 }
 
 func TestGetDuplicate(t *testing.T) {
+	path := "/home/d/projects/gb/best-practice/hw2/test/test_dir"
 	testCases := []struct {
 		Name      string
 		path      string
@@ -61,17 +70,17 @@ func TestGetDuplicate(t *testing.T) {
 		},
 		{
 			Name:      "test1",
-			path:      "/home/d/projects/gb/best-practice/hw2/test_dir",
+			path:      path,
 			duplicate: []string{},
 		},
 		{
 			Name:      "test2",
-			path:      "/home/d/projects/gb/best-practice/hw2/test_dir",
+			path:      path,
 			duplicate: []string{},
 		},
 		{
 			Name:      "test3",
-			path:      "/home/d/projects/gb/best-practice/hw2/test_dir",
+			path:      path,
 			duplicate: []string{},
 		},
 	}
@@ -85,7 +94,7 @@ func TestGetDuplicate(t *testing.T) {
 	for i := 2; i < len(testCases); i++ {
 		tt := testCases[i]
 
-		tt.duplicate = additional.CreateDuplicateFile(tt.path)
+		tt.duplicate = helper.CreateDuplicateFile(tt.path)
 
 		res, err := GetDuplicateFile(tt.path)
 
